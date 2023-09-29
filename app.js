@@ -16,7 +16,7 @@ app.get("/",cors(),(req,res)=>{
 })
 
 
-
+//////login
 app.post("/",async(req,res)=>{
     const{email, password}=req.body;
 
@@ -43,7 +43,7 @@ app.post("/",async(req,res)=>{
 });
 
 
-
+/////////signup api
 app.post("/signup",async(req,res)=>{
     const{email, password,ConfirmPassword,firstname,lastname,gender,phone}=req.body;
 
@@ -77,44 +77,73 @@ app.post("/signup",async(req,res)=>{
     }
 
 })
+/////userdetail
 app.get("/user/:id", async (req, res) => {
 
     const userId = req.params.id;
-
- 
-
-    try {
+try {
 
       // Use the userId to find the user in the MongoDB collection
-
-      const user = await collection.findOne({ _id: userId });
-
- 
-
-      if (user) {
+   const user = await collection.findOne({ _id: userId });
+if (user) {
 
         // Send the user details as JSON response
-
-        res.json(user);
+res.json(user);
 
       } else {
 
         // If user is not found, return a 404 status and an error message
 
         res.status(404).json({ message: "User not found" });
+}
+} catch (e) {
+
+      console.error("Error fetching user details:", e);
+      res.status(500).json({ message: "Internal server error" });
+
+    }
+});
+//////////////update userdetail
+app.put("/user/:id", async (req, res) => {
+
+    const userId = req.params.id;
+
+    const updatedUser = req.body; //  should contain the updated user data
+try {
+
+      // Use MongoDB update methods (e.g., findOneAndUpdate) to update the user
+      const updatedUserData = await collection.findOneAndUpdate(
+
+        { _id: userId },
+
+        { $set: updatedUser },
+
+        { new: true } // Return the updated user data
+
+      );
+    if (updatedUserData) {
+
+        // If the user is updated successfully, send the updated data as JSON response
+
+        res.json(updatedUserData);
+
+      } else {
+
+        // If the user is not found, return a 404 status and an error message
+
+        res.status(404).json({ message: "User not found" });
 
       }
 
-    } catch (e) {
+    } catch (error) {
 
-      console.error("Error fetching user details:", e);
+      console.error("Error updating user profile:", error);
 
       res.status(500).json({ message: "Internal server error" });
 
     }
 
   });
-
 app.listen(8000,()=>{
     console.log("port connected");
 })
