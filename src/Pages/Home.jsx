@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation,Link } from 'react-router-dom';
 
 import axios from 'axios';
 
@@ -117,9 +117,9 @@ const Home = () => {
 
           <h1>Welcome,</h1>
 
-          <p>Name: {isEditing ? <input type="text" name="firstname" value={editedUser.firstname} onChange={handleInputChange} /> : user.firstname}
-
-          {isEditing ? <input type="text" name="lastname" value={editedUser.lastname} onChange={handleInputChange} /> : user.lastname}</p>
+          <p> <span>Name: </span>{isEditing ? <input type="text" name="firstname" value={editedUser.firstname} onChange={handleInputChange}/> : user.firstname}
+          <span> </span>
+           {isEditing ? <input type="text" name="lastname" value={editedUser.lastname} onChange={handleInputChange} /> : user.lastname}</p>
 
           <p>Email: {isEditing ? <input type="email" name="Email" value={editedUser.email} onChange={handleInputChange} />:user.email}</p>
 
@@ -128,7 +128,9 @@ const Home = () => {
           <p>Gender: {isEditing ? <input type="text" name="Gender" value={editedUser.gender} onChange={handleInputChange} />:user.gender}</p>
 
           <p>Phone: {isEditing ? <input type="number" name="Phone" value={editedUser.phone} onChange={handleInputChange} />:user.phone}</p>
-
+          <Link to="/" >Logout </Link>
+           <br/>
+           <br/>
           {isEditing ? (
 
             <div>

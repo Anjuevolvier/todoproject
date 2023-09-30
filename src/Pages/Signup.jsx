@@ -40,15 +40,7 @@ function Login() {
                     alert("User already exists")
                 }
                 else if(res.data === "notexist"){
-                    history("/home",{state:{
-                        email:email,
-                        // password: password,
-                        // ConfirmPassword: ConfirmPassword,
-                        // firstname: firstname,
-                        // lastname: lastname,
-                        // gender: gender,
-                        // phone: phone,
-                      }})
+                    history("/")
                 }
             })
             .catch(e=>{
