@@ -1,6 +1,6 @@
 const express = require("express")
-const mongoose = require("mongoose")
-const router = express.Router();
+// const mongoose = require("mongoose")
+// const router = express.Router();
 const collection = require("./mongo")
 const cors = require("cors")
 const app = express()
@@ -57,24 +57,41 @@ app.post("/signup",async(req,res)=>{
         phone:phone
     };
 
-    try{
-        const check=await collection.findOne({email:email});
+   
+    try {
 
-        if(check){
-            res.json("exist")
-        }
-        else{
-            res.json("notexist")
-            
-            await collection.insertMany([data]);
+      const check = await collection.findOne({ email: email });
+      if (check) {
 
-        }
+          console.log("User already exists");
 
-    }
-    catch(e){
-        console.error(e);
-        res.json("fail")
-    }
+          res.json({ message: "User already exists" });
+
+      }
+
+      else {
+
+         
+
+          console.log("User registered:");
+
+          res.json( "not exist");
+
+          await collection.insertMany([data]);
+
+      }
+
+
+
+  }
+
+  catch (e) {
+
+      console.error("Error during signup:", e);
+
+      res.status(500).json({ message: "Signup failed" });
+
+  }
 
 })
 /////userdetail

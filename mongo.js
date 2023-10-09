@@ -11,11 +11,13 @@ mongoose.connect("mongodb://0.0.0.0:27017/react-login")
 const newSchema=new mongoose.Schema({
     email:{
         type:String,
-        required:true
+        required:true,
+        unique:true,
     },
     password:{
         type:String,
-        required:true
+        required:true,
+        minlength:8,
     },
     ConfirmPassword:{
         type:String,
