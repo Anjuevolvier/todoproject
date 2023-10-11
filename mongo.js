@@ -19,10 +19,10 @@ const newSchema=new mongoose.Schema({
         required:true,
         minlength:8,
     },
-    ConfirmPassword:{
-        type:String,
-        required:true
-    },
+    // ConfirmPassword:{
+    //     type:String,
+    //     required:true
+    // },
     firstname:{
         type:String,
         required:true

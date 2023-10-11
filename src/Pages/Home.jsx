@@ -56,58 +56,58 @@ const Home = () => {
 
 
 
-  const handleEditClick = () => {
+  // const handleEditClick = () => {
 
-    setIsEditing(true);
+  //   setIsEditing(true);
 
-  };
-
-
-
-  const handleCancelClick = () => {
-
-    setIsEditing(false);
-
-    // Reset editedUser to the original user data
-
-    setEditedUser(user);
-
-  };
+  // };
 
 
 
-  const handleSaveClick = async () => {
+  // const handleCancelClick = () => {
 
-    try {
+  //   setIsEditing(false);
 
-      // Send a PUT request to update the user's profile
+  //   // Reset editedUser to the original user data
 
-      const response = await axios.put(`http://localhost:8000/user/${userId}`, editedUser);
+  //   setEditedUser(user);
+
+  // };
 
 
 
-      // Update the user with the updated data
+  // const handleSaveClick = async () => {
 
-      setUser(response.data);
+  //   try {
 
-      setIsEditing(false);
+  //     // Send a PUT request to update the user's profile
 
-    } catch (error) {
+  //     const response = await axios.put(`http://localhost:8000/user/${userId}`, editedUser);
 
-      console.error('Error updating profile:', error);
 
-    }
 
-  };
-  const handleInputChange = (e) => {
+  //     // Update the user with the updated data
 
-    const { name, value } = e.target;
+  //     setUser(response.data);
 
-    // Update the editedUser object when input fields change
+  //     setIsEditing(false);
 
-    setEditedUser({ ...editedUser, [name]: value });
+  //   } catch (error) {
 
-  };
+  //     console.error('Error updating profile:', error);
+
+  //   }
+
+  // };
+  // const handleInputChange = (e) => {
+
+  //   const { name, value } = e.target;
+
+  //   // Update the editedUser object when input fields change
+
+  //   setEditedUser({ ...editedUser, [name]: value });
+
+  // };
 
 
 
@@ -119,9 +119,10 @@ const Home = () => {
       <AppBar position="static" sx={{ backgroundColor: '#0E9B95', padding: '20px' }}><Logo2 /></AppBar>
 
       {user ? (
-        <Grid container>
-          <Grid item sx={{
-              width: '100%', height: 'auto', marginLeft: '500px', marginTop: '50px'
+        <Grid container sx={{paddingLeft:{xs:'30px',sm:'150px',md:'300px',lg:'500px'}}}>
+          <Grid item  xs={6} sm={6} md={6} lg={6} sx={{
+              width: '100%', height: 'auto', 
+               marginTop: '50px'
             }}><Typography sx={{
               color: '#000',
               fontFamily: 'Montagu Slab, sans-serif',
@@ -153,108 +154,7 @@ const Home = () => {
                 lineHeight: 'normal'
               }}>RoamRight Profile !</span> </Typography>
           </Grid>
-          {/* <Grid item> */}
-            {/* <Card sx={{
-              borderRadius: '20px',
-              border: '5px dashed #0E9B95',
-              background: '#FFF', maxWidth: '700px', width: '100%', height: ' 350.289px', marginLeft: '500px', marginTop: '20px'
-            }}> */}
-              {/* <CardContent>
-             <Typography
-
-                  sx={{
-
-                    color: '#000',
-
-                    fontFamily: 'Aleo, sans-serif',
-
-                    fontSize: '35px',
-
-                    fontStyle: 'normal',
-
-                    fontWeight: '700',
-
-                    lineHeight: 'normal',
-
-                  }}>{isEditing ? <input type="text" name="firstname" value={editedUser.firstname} onChange={handleInputChange} /> : user.firstname}{' '}
-
-
-
-                  {isEditing ? <input type="text" name="lastname" value={editedUser.lastname} onChange={handleInputChange} /> : user.lastname}</Typography>
-
-                <Typography sx={{
-
-                  color: '#000',
-
-                  fontFamily: 'Aleo, sans-serif',
-
-                  fontSize: '20px',
-
-                  fontStyle: 'normal',
-
-                  fontWeight: '400',
-
-                  lineHeight: 'normal',
-
-                }}> {isEditing ? <input type="email" name="Email" value={editedUser.email} onChange={handleInputChange} /> : user.email}</Typography>
-
-                <Typography sx={{
-
-                  color: '#000',
-
-                  fontFamily: 'Aleo, sans-serif',
-
-                  fontSize: '20px',
-
-                  fontStyle: 'normal',
-
-                  fontWeight: '400',
-
-                  lineHeight: 'normal',
-
-                }}> {isEditing ? <input type="number" name="Phone" value={editedUser.phone} onChange={handleInputChange} /> : user.phone}</Typography>
-
-                <Typography sx={{
-
-                  color: '#000',
-
-                  fontFamily: 'Aleo, sans-serif',
-
-                  fontSize: '20px',
-
-                  fontStyle: 'normal',
-
-                  fontWeight: '400',
-
-                  lineHeight: 'normal',
-
-                }}> {isEditing ? <input type="text" name="Gender" value={editedUser.gender} onChange={handleInputChange} /> : user.gender}</Typography>
-
-
-
-                {isEditing ? (
-
-                  <div>
-
-                    <button onClick={handleSaveClick}>Save</button>
-
-                    <button onClick={handleCancelClick}>Cancel</button>
-
-                  </div>
-
-                ) : (
-
-                  <button onClick={handleEditClick}>Edit Profile</button>
-
-                )}
-
-                <br />
-
-                <Link to="/">Logout</Link>
-
-
-
-              </CardContent> */}
+         
               <Grid item>
             {/* Pass the 'user' object as a prop to UserDetails component */}
             <Userdetails user={user} />
@@ -275,36 +175,6 @@ const Home = () => {
 
 
 export default Home;
-{/* <p> <span>Name: </span>{isEditing ? <input type="text" name="firstname" value={editedUser.firstname} onChange={handleInputChange}/> : user.firstname}
-          <span> </span>
-           {isEditing ? <input type="text" name="lastname" value={editedUser.lastname} onChange={handleInputChange} /> : user.lastname}</p>
-           
-
-          <p>Email: {isEditing ? <input type="email" name="Email" value={editedUser.email} onChange={handleInputChange} />:user.email}</p>
-
-          <p>Password: {isEditing ? <input type="password" name="Password" value={editedUser.password} onChange={handleInputChange} />:user.password}</p>
-
-          <p>Gender: {isEditing ? <input type="text" name="Gender" value={editedUser.gender} onChange={handleInputChange} />:user.gender}</p>
-
-          <p>Phone: {isEditing ? <input type="number" name="Phone" value={editedUser.phone} onChange={handleInputChange} />:user.phone}</p>
-          <Link to="/" >Logout </Link>
-           <br/>
-           <br/>
-          {isEditing ? (
-
-            <div>
-
-              <button onClick={handleSaveClick}>Save</button>
-
-              <button onClick={handleCancelClick}>Cancel</button>
-
-            </div>
-
-          ) : (
-
-            <button onClick={handleEditClick}>Edit Profile</button>
-
-          )} */}
 
 
 
