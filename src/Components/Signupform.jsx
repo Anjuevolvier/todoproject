@@ -141,7 +141,7 @@ const Signupform = ({ user,onClose }) => {
             setRegistrationMessage("User successfully registered");
             // Redirect after a delay
             setTimeout(() => {
-              history("/");
+              history("/login");
             }, 2000); // Delay for 2 seconds
           }
         })
@@ -167,6 +167,7 @@ const Signupform = ({ user,onClose }) => {
       justifyContent={'center'}
       alignItems={'center'}
       spacing={1}
+
     // overflow={'hidden'}
     >
 
@@ -184,6 +185,7 @@ const Signupform = ({ user,onClose }) => {
         gap={{ xs: '10px', lg: '20px' }}
 
         flexDirection={{ xs: 'column', md: 'row', lg: 'row' }}// Set initial layout direction to row
+        marginTop={'20px'}
 
 
       >
@@ -201,7 +203,7 @@ const Signupform = ({ user,onClose }) => {
                 fontSize: '15px',
                 fontStyle: 'normal',
                 fontWeight: '400',
-                lineHeight: 'normal', overflow: 'hidden'
+                lineHeight: 'normal', 
               }}
 
 
@@ -216,6 +218,7 @@ const Signupform = ({ user,onClose }) => {
             borderRadius: '11px',
             border: '1px solid #EEE1C3',
             background: '#FFFCF3',
+            width:{xs:'100%',sm:'100%',md:'50%',lg:'50%',xl:'50%'}
 
 
           }}
@@ -264,6 +267,7 @@ const Signupform = ({ user,onClose }) => {
             borderRadius: '11px',
             border: '1px solid #EEE1C3',
             background: '#FFFCF3',
+            width:{xs:'100%',sm:'100%',md:'50%',lg:'50%',xl:'50%'}
           }}
 
           id="outlined-size-small"
@@ -317,7 +321,7 @@ const Signupform = ({ user,onClose }) => {
       <Grid item xs={12} sm={12} md={12} lg={12}  >
 
         <TextField
-          value={password}
+          //value={password}
           label={(<Typography sx={{
             color: '#B4B4B4',
             fontFamily: 'Montagu Slab, sans-serif',

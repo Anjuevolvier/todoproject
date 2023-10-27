@@ -1,4 +1,4 @@
-import React from 'react'
+// import React from 'react'
 import { Box, Typography,} from '@mui/material';
 
 export const Logo3 = () => {
@@ -9,14 +9,13 @@ export const Logo3 = () => {
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'row',
-                    // alignItems:'flex-start',
-                    // justifyContent:"flex-start",
-                    // marginTop: {xs:'3px',md:'10px'},
-                    // marginLeft: {xs:'200px',md:'40px'}
+                    justifyContent:'xs:center'
+               
+                
                 }}>
                     <Typography sx={{
                         // width: {xs:'200px',md:'319.848px'},
-                        width:'100%',
+                        // width:'100%',
                         height: {xs:'30px',md:'50.753px'},
                         flexShrink: '0',
                         color: '#000',
@@ -27,11 +26,9 @@ export const Logo3 = () => {
                         lineHeight: 'normal',
                         paddingBottom:'10px',
                         paddingLeft:{xs:'150px',sm:'0px',md:'0px',lg:'0px'}
-                        // display: 'flex', 
-                        // flexDirection: 'row',
-                        // alignItems:'flex-start',
-                        // justifyContent:"flex-start",
-                        // marginTop:'50px'
+                        
+                        
+                       
                         
 
                     }}>Login with</Typography>
@@ -43,6 +40,7 @@ export const Logo3 = () => {
                 }}>
                             <img
                                 src='/google.png'
+                                alt='Google'
                                 style={{
                                 maxWidth: '40.327px',
                                 width:'100%',
@@ -52,6 +50,7 @@ export const Logo3 = () => {
                                 }} />
                             <img
                                 src='/facebook.png'
+                                alt='Facebook'
                                 style={{
                                     maxWidth: '40.327px',
                                     width:'100%',

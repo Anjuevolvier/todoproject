@@ -6,7 +6,7 @@ import {  Link } from "react-router-dom"
   return (
     <Box>
     
-    <Typography sx={{padding:{xs:'5px 0px 5px 40px',md:'0px 0px 0px 40px',lg:'20px 0px 20px 120px'},
+    <Typography sx={{padding:{xs:'5px 0px 5px 40px',md:'0px 0px 0px 40px',lg:'20px 0px 20px 0px'},
       // marginTop:{xs:'20px',md:'45px'},
       //               marginLeft:{xs:'180px',md:'140px'},
                     color: '#000',

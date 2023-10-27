@@ -4,7 +4,7 @@ import { Grid, Typography, Box} from '@mui/material';
 
 export const Text = () => {
   return (
-   <Grid item xs={12} sm={6} md={6}  >
+   <Grid item xs={12} sm={6} md={6} >
   
        <Box sx={{display: 'flex', 
                             flexDirection: 'column',}}>
@@ -13,8 +13,13 @@ export const Text = () => {
                   //           flexDirection: 'row',
                             alignItems:'flex-start',
                             justifyContent:'flex-start',
-                            margin:{xs:'30px 0px 0px 240px',sm:'0px 0px 0px 120px',md:'0px 0px 0px 80px',
-                            lg:'62px 62px 62px 62px'}
+                            // margin:{
+                            // xs:'30px 0px 0px 240px',
+                            // sm:'0px 0px 0px 120px',
+                            // md:'0px 0px 0px 80px',
+                            // lg:'62px 62px 62px 62px'}
+                            margin:{xs:'30px 0px 0px 0px',sm:'0px 0px 0px 0px',md:'0px 0px 0px 0px',lg:'0px 0px 0px -400px',
+                            xl:'62px 62px 62px -500px'}
 
                             
                             

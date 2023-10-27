@@ -19,10 +19,7 @@ const newSchema=new mongoose.Schema({
         required:true,
         minlength:8,
     },
-    // ConfirmPassword:{
-    //     type:String,
-    //     required:true
-    // },
+  
     firstname:{
         type:String,
         required:true
@@ -34,11 +31,24 @@ const newSchema=new mongoose.Schema({
     gender:{
         type:String,
         required:true
-    },
+  },
     phone:{
         type:Number,
         required:true
-    }
+    },
+    tokens:[
+        {
+            token:
+            {
+                type:String,
+                required:true
+            },
+            expiration: {
+                type: Date, // Store the expiration timestamp as a UNIX timestamp
+                //required: true
+              }
+        }
+    ],
 
 
 })

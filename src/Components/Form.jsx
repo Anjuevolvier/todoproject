@@ -7,9 +7,11 @@ import axios from "axios"
 import { useNavigate,  } from "react-router-dom"
 
 
+
+
 const Form = () => {
   const history = useNavigate();
-
+ 
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -22,45 +24,44 @@ const Form = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
 
   };
-  async function submit(e) {
+  
+  const submit = async (e) => {
     e.preventDefault();
-
     try {
+      const response = await axios.post('http://localhost:8000/', {
+        email,
+        password,
+      });
 
-      await axios.post("http://localhost:8000/", {
-        email, password,
-      })//to request to server
+      console.log('response', response);
 
-        .then(res => {
-          console.log("response", res)
-          if (res.data && res.data.user && res.data.user._id) {
-            const userId = res.data.user._id;
-            history("/home", { state: { userId: userId } })
-          }
-          else if (res.data === "user does not exist") {
-            alert("user have not signup")
-          }
-        })
-
-        .catch(e => {
-          alert("wrong details")
-          console.log(e);
-
-        })
-
+      if (response.data && response.data.user && response.data.user._id && response.data.authToken) {
+        const userId = response.data.user._id;
+        const authToken = response.data.authToken;
+        localStorage.setItem('authToken',authToken);
+        localStorage.setItem('userId',userId);
+       
+        //setCurrentUser(authToken);
+        history('/', { state: { userId } });
+      } 
+      else if (response.data === 'User does not exist') {
+        alert('User has not signed up');
+      } else{
+        alert('Wrong details');
+      }
+    } catch (error) {
+      alert('Wrong details');
+      console.error(error);
     }
-    catch (e) {
-      console.log(e);
-
-
-    }
-  }
+  };
   return (
     <Grid container
       justifyContent={'center'}
       alignItems={'center'}
       spacing={2}
       overflow={'hidden'}
+     
+
       >
       <Grid item xs={12} sm={12} md={12} lg={12} >
       
@@ -165,3 +166,4 @@ const Form = () => {
   )
 }
 export default Form
+

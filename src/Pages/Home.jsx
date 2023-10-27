@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-import { useLocation,  } from 'react-router-dom';
+//import { useLocation, } from 'react-router-dom';
 
 import { Typography, Grid, Box } from '@mui/material';
 import axios from 'axios';
@@ -12,103 +12,42 @@ import Userdetails from '../Components/Userdetails';
 
 const Home = () => {
 
-  const location = useLocation();
+  // const location = useLocation();
 
-  const userId = location.state.userId;
+  // const userId = location.state.userId;
 
 
 
   const [user, setUser] = useState(null);
 
-  const [isEditing, setIsEditing] = useState(false);
+  // const [isEditing, setIsEditing] = useState(false);
 
-  const [editedUser, setEditedUser] = useState(null);
+  // const [editedUser, setEditedUser] = useState(null);
 
 
-
+  const [userId] = useState(localStorage.getItem('userId'));
+  const [authToken, setAuthToken] = useState(localStorage.getItem('authToken'));
   useEffect(() => {
+    // Fetch the user details using the user ID and the authToken
+    const authToken = localStorage.getItem('authToken'); // Get the authentication token from local storage
+    const userId = localStorage.getItem('userId'); 
 
-    // Fetch the user details using the user ID
 
-    if (userId) {
-
-      axios.get(`http://localhost:8000/user/${userId}`)
-
-        .then((response) => {
-
-          setUser(response.data);
-
-          // Initialize editedUser with the fetched user data
-
-          setEditedUser(response.data);
-
+    if (userId && authToken) {
+      axios
+        .get(`http://localhost:8000/user/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${authToken}`, // Include the authToken in the request headers
+          },
         })
-
+        .then((response) => {
+          setUser(response.data);
+        })
         .catch((error) => {
-
-          console.error("Error fetching user details:", error);
-
+          console.error('Error fetching user details:', error);
         });
-
     }
-
   }, [userId]);
-
-
-
-  // const handleEditClick = () => {
-
-  //   setIsEditing(true);
-
-  // };
-
-
-
-  // const handleCancelClick = () => {
-
-  //   setIsEditing(false);
-
-  //   // Reset editedUser to the original user data
-
-  //   setEditedUser(user);
-
-  // };
-
-
-
-  // const handleSaveClick = async () => {
-
-  //   try {
-
-  //     // Send a PUT request to update the user's profile
-
-  //     const response = await axios.put(`http://localhost:8000/user/${userId}`, editedUser);
-
-
-
-  //     // Update the user with the updated data
-
-  //     setUser(response.data);
-
-  //     setIsEditing(false);
-
-  //   } catch (error) {
-
-  //     console.error('Error updating profile:', error);
-
-  //   }
-
-  // };
-  // const handleInputChange = (e) => {
-
-  //   const { name, value } = e.target;
-
-  //   // Update the editedUser object when input fields change
-
-  //   setEditedUser({ ...editedUser, [name]: value });
-
-  // };
-
 
 
   return (
@@ -119,11 +58,35 @@ const Home = () => {
       <AppBar position="static" sx={{ backgroundColor: '#0E9B95', padding: '20px' }}><Logo2 /></AppBar>
 
       {user ? (
-        <Grid container sx={{paddingLeft:{xs:'30px',sm:'150px',md:'300px',lg:'500px'}}}>
-          <Grid item  xs={6} sm={6} md={6} lg={6} sx={{
-              width: '100%', height: 'auto', 
-               marginTop: '50px'
-            }}><Typography sx={{
+        <Grid container
+          // justifyContent={'center'}
+          // alignItems={'center'}
+          // marginLeft={'10px'}
+          display={'flex'}
+          flexDirection={'column'}
+          // paddingLeft={{xs:'50px',sm:'180px',md:'200px',lg:'380px',xl:'450px'}}//350 400
+          // paddingRight={{xs:'100px',sm:'180px',md:'200px',lg:'380px',xl:'500px'}}//400 500
+          paddingLeft={{xs:'30px',sm:'80px',md:'200px',lg:'260px',xl:'450px'}}//350 400
+          paddingRight={{xs:'100px',sm:'120px',md:'250px',lg:'310px',xl:'500px'}}//400 500
+          //  backgroundColor={'blue'}
+          paddingTop={'50px'}
+          >
+         
+         <Grid item
+            sx={{
+              width: '100%',
+              height: 'auto',
+              marginBottom:'20px',
+             
+              flexDirection:'column',
+              // backgroundColor:'red',
+              // display: 'flex',
+              // flexDirection: 'column',
+              alignItems: 'center',
+              // overflowX: 'hidden', // Prevent horizontal scrolling
+            }}>
+         <Box sx={{textAlign:'left'}}>
+            <Typography sx={{
               color: '#000',
               fontFamily: 'Montagu Slab, sans-serif',
               fontSize: '30px',
@@ -138,34 +101,35 @@ const Home = () => {
               lineHeight: 'normal',
               textTransform: 'capitalize',
             }}>{user.firstname}</span>,</Typography>
-              <Typography sx={{
-                color: '#000',
-                fontFamily: 'Montagu Slab, sans-serif',
-                fontSize: '30px',
-                fontStyle: 'normal',
-                fontWeight: '400',
-                lineHeight: 'normal',
-              }}>here is your <span style={{
-                color: '#000',
-                fontFamily: 'Montagu Slab, sans-serif',
-                fontSize: '30px',
-                fontStyle: 'normal',
-                fontWeight: '600',
-                lineHeight: 'normal'
-              }}>RoamRight Profile !</span> </Typography>
+            <Typography sx={{
+              color: '#000',
+              fontFamily: 'Montagu Slab, sans-serif',
+              fontSize: '30px',
+              fontStyle: 'normal',
+              fontWeight: '400',
+              lineHeight: 'normal',
+            }}>here is your <span style={{
+              color: '#000',
+              fontFamily: 'Montagu Slab, sans-serif',
+              fontSize: '30px',
+              fontStyle: 'normal',
+              fontWeight: '600',
+              lineHeight: 'normal'
+            }}>RoamRight Profile !</span> </Typography>
+            </Box>
+
           </Grid>
-         
-              <Grid item>
+
+          <Grid item>
             {/* Pass the 'user' object as a prop to UserDetails component */}
-            <Userdetails user={user} />
+            <Userdetails user={user} authToken={authToken} setAuthToken={setAuthToken} />
           </Grid>
-            {/* </Card> */}
-          {/* </Grid> */}
+
         </Grid>
-      ):(
+      ) : (
         <p> loading......</p>
       )}
-        </Box>
+    </Box>
 
 
   );

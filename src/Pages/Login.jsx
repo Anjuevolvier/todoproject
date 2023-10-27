@@ -17,7 +17,7 @@ const Login = () => {
           backgroundRepeat: "no-repeat",
           width: "100%",
           
-          height:{md:'100vh',xs:'100%'},
+          height:{md:'100vh',xs:'100%',sm:'100vh'},
           
           backgroundSize: "cover",
           display: "flex",

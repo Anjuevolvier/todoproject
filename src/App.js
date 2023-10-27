@@ -1,49 +1,38 @@
-
-//import './App.css';
+import './App.css';
 import React from 'react'
 import Home from "./Pages/Home"
 import Login from "./Pages/Login"
 import Signup from "./Pages/Signup"
-
-
-
-import {BrowserRouter as Router,Routes,Route} from "react-router-dom";
-
-
+import Privateroute from './Components/Privateroute'
+import PublicRoute from './Components/PublicRoute'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 
 function App() {
+  //const isAuthenticated = localStorage.getItem('authToken') ? true : false
+ 
+  
+
   return (
     <div className="App">
       <Router>
         <Routes>
-        <Route path="/" element={<Login/>}/>
-        <Route path="/signup" element={<Signup/>}/>
-        <Route path="/home" element={<Home/>}/>
-        </Routes>
+        <Route
+            path="/login"
+            element={<PublicRoute element={<Login />}   />}
+          />
+          <Route
+            path="/signup"
+            element={<PublicRoute element={<Signup />}   />}
+          /> 
+        <Route
+            path="/"
+            element={<Privateroute element={<Home />}  />}
+          />
+           </Routes>
       </Router>
     </div>
   );
 }
-
 export default App;
 
 
-// import React from 'react';
-// import Login from './Pages/Login';
-// import Boxs from './Components/Boxs';
-// import Logo from './Components/Logo';
-// import Logo2 from './Components/Logo2';
-// import {BrowserRouter as Router,Routes,Route} from "react-router-dom";
-// import {useState } from 'react';
-// const App = () => {
-//   return (
-//     <div className="App">
-//       <Login/>
-//       <Boxs/>
-//       <Logo/>
-//       <Logo2/>
-//       </div>
-//   )
-// }
-
-// export default App;
