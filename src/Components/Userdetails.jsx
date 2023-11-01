@@ -1,30 +1,39 @@
 
-import React  from 'react'
+import React from 'react'
 import { Typography, Box, Button } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import FemaleIcon from '@mui/icons-material/Female';
 import MaleIcon from '@mui/icons-material/Male';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useNavigate, } from "react-router-dom"
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Signupform from '../Components/Signupform';
 import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
+const timestamp = new Date().getTime();
 
 
 
 
 
 
-function Userdetails({ user,authToken,setAuthToken, }) {
+function Userdetails({ user, authToken, setAuthToken, }) {
 
   const [isEditing, setIsEditing] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(undefined);
   const [imagePath, setImagePath] = useState(null);
-  
-  
+  const [imageUrl, setImageUrl] = useState(imagePath ? imagePath : (user.imagePath && user.imagePath[0] && user.imagePath[0].url) || '');
+
+  useEffect(() => {
+    let imageUrl = imagePath ? imagePath : (user.imagePath && user.imagePath[0] && user.imagePath[0].url) || '';
+    setImageUrl(imageUrl);
+  }, [imagePath, user.imagePath]);
+
+
+
 
   const handleEditClick = () => {
 
@@ -34,18 +43,13 @@ function Userdetails({ user,authToken,setAuthToken, }) {
   const handleClose = () => {
     setIsEditing(false);
   };
-  // const handleAvatarChange = (event) => {
-  //   const file = event.target.files[0];
-  //   setSelectedAvatar(file); 
-  //   console.log('setSelectedAvatar:',setSelectedAvatar);
-  // };
-  
+
   const history = useNavigate();
 
   ///////logout
   const handleLogoutClick = async () => {
     try {
-     
+
       const response = await fetch("http://localhost:8000/logout", {
         method: "POST",
         headers: {
@@ -53,16 +57,16 @@ function Userdetails({ user,authToken,setAuthToken, }) {
         },
         body: JSON.stringify({ userId: user._id }),
       });
-      
-  
+
+
       if (response.status === 200) {
         // Clear the token from local storage
         localStorage.removeItem('authToken');
-        
+
         // Update the authentication state to indicate the user is not authenticated
-        setAuthToken(null); 
-           
-      
+        setAuthToken(null);
+
+
         history('/login');
       } else {
         // Handle the case where the logout request on the server failed
@@ -73,18 +77,18 @@ function Userdetails({ user,authToken,setAuthToken, }) {
     }
   };
   ////image upload
-  
+
   const handleAvatarChangeAndUpload = async (event) => {
     console.log('hlo');
     if (event.target.files && event.target.files.length > 0) {
       console.log('inside');
       const file = event.target.files[0];
       setSelectedAvatar(file);
-  
+
       const formData = new FormData();
       formData.append('image', file);
       formData.append('userId', user._id); // Send the user ID as part of the form data
-  
+
       try {
         console.log('inside try');
         const response = await axios.post("http://localhost:8000/uploadimage", formData, {
@@ -93,11 +97,12 @@ function Userdetails({ user,authToken,setAuthToken, }) {
             Authorization: `Bearer ${authToken}`,
           },
         });
-  
+        console.log('help');
         if (response.status === 200) {
-          setImagePath(response.data.imagePath);
-          console.log(response.data.imagePath)
+          setImagePath(response.data.imageUrl);
+          console.log('path', response.data.imagePath);
           console.log('Image uploaded successfully');
+
         } else {
           // Handle errors
           console.error('Image upload failed on the server');
@@ -110,8 +115,35 @@ function Userdetails({ user,authToken,setAuthToken, }) {
     }
   };
   
-  console.log(user);
-  console.log('imagepath',user.imagePath);
+  
+  const handleDeleteProfilePicture = async () => {
+    try {
+      const response = await axios.delete('http://localhost:8000/deleteimage', {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+        data: { userId: user._id },
+      });
+  
+      if (response.status === 200) {
+        // Picture deleted successfully
+        setImageUrl(null); // Set the image URL to null
+      } else {
+        // Handle errors
+        console.error('Profile picture deletion failed on the server');
+      }
+    } catch (error) {
+      console.error('Error during profile picture deletion:', error);
+    }
+  };
+  
+  
+
+  console.log('userdata',user);
+  console.log('imagepath', user.imagePath);
+  //let imageUrl = imagePath?imagePath:user.imagePath[0].url;
+  //let imageUrl = user.imagePath && user.imagePath.length > 0 ? user.imagePath[0].url : imagePath;
+
   return (
     <Box
 
@@ -122,40 +154,29 @@ function Userdetails({ user,authToken,setAuthToken, }) {
         width: '100%',
         height: 'auto',
         display: 'flex',
-       flexDirection:{xs:'column',sm:'column',md:'row',lg:'row',xl:'row'},
+        flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row', xl: 'row' },
         justifyContent: 'space-between',
-      alignItems:{xs:'center'},
-        padding:{xs:'10px',sm:'20px',md:'20px',lg:'20px',xl:'20px'}
+        alignItems: { xs: 'center' },
+        padding: { xs: '10px', sm: '20px', md: '20px', lg: '20px', xl: '20px' }
       }}>
-      <Box display={'flex'} flexDirection ={{xs:'column',sm:'row',md:'row',lg:'row',xl:'row'}} gap={'20px'}   >
-       
-      <Box>
-         
-     
-          {/* {selectedAvatar ? (
-            // Display the selected avatar
-           <Avatar src={URL.createObjectURL(selectedAvatar)} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
-           
-           ) : (
+      <Box display={'flex'} flexDirection={{ xs: 'column', sm: 'row', md: 'row', lg: 'row', xl: 'row' }} gap={'20px'}   >
+      <Box display="flex" flexDirection="column" alignItems="center">
+
+        
+
+          {imageUrl ? (
+
+
+            <Avatar src={`${imageUrl}?${timestamp}`} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
+
+
+
+          ) : (
             // Display the user's avatar
             <Avatar sx={{ width: '150px', height: '150px', fontSize: '50px' }}>
               {user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}
-            </Avatar>
-          )} */}
-            {user.imagePath && user.imagePath.length > 0 ? (
-              
-  // Display the uploaded avatar
-  // <Avatar src={user.imagePath[0].url} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
-  <Avatar src={`${user.imagePath[0].url}?${new Date().getTime()}`} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
+            </Avatar>)}
 
-  
-
-) : (
-  // Display the user's avatar
-  <Avatar sx={{ width: '150px', height: '150px', fontSize: '50px' }}>
-    {user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}
-  </Avatar> )}
-        
 
           <input
             type="file"
@@ -164,7 +185,7 @@ function Userdetails({ user,authToken,setAuthToken, }) {
             onChange={handleAvatarChangeAndUpload}
             style={{ display: 'none' }} // Hide the input
             id="avatar-upload-input"
-           
+
           />
           <label htmlFor="avatar-upload-input" sx={{ cursor: 'pointer' }}>
             <div
@@ -182,21 +203,42 @@ function Userdetails({ user,authToken,setAuthToken, }) {
                 cursor: 'pointer',
               }}
             >
-              <span  
+              <span
                 sx={{
                   color: 'white',
                   fontSize: '20px',
                   fontWeight: 'bold',
-                  
-                }}
                 
+
+                }}
+
               >
-                 <AddAPhotoIcon  />
+                <AddAPhotoIcon />
               </span>
             </div>
           </label>
-        </Box>
+        <Button
+  variant="outlined"
+  onClick={handleDeleteProfilePicture}
+  sx={{
+    color: 'black', // Change the color to red or any other color you prefer
+    fontFamily: 'Montagu Slab, sans-serif',
+    fontSize: '10px',
+    fontStyle: 'normal',
+    fontWeight: '500',
+    lineHeight: 'normal',
+    //textTransform: 'capitalize',
+    //border: '1px solid black',
+    border:'none',
+   
 
+  }}
+>
+  <DeleteIcon />
+</Button>
+
+        
+        </Box>
         <Box>
           <Typography
             sx={{
@@ -253,7 +295,7 @@ function Userdetails({ user,authToken,setAuthToken, }) {
         </Box>
       </Box>
 
-      <Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'} gap={'10px'} marginRight={{xs:'70px'}}  marginTop={{xs:'30px'}}>
+      <Box display={'flex'} flexDirection={'column'} alignItems={'center'} justifyContent={'center'} gap={'10px'} marginRight={{ xs: '70px' }} marginTop={{ xs: '30px' }}>
         <Button variant="outlined" onClick={handleEditClick} sx={{
           color: '#202020',
           fontFamily: 'Montagu Slab, sans-serif',

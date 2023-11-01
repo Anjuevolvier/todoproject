@@ -13,8 +13,9 @@ const crypto = require('crypto');
 const bcrypt = require("bcrypt");
 const fileUpload = require('express-fileupload');
 const path = require('path');
-//const fs = require('fs');
+const fs = require('fs');
 app.use(fileUpload()); // Enable file uploads
+
 
 
 
@@ -43,7 +44,7 @@ app.post('/uploadimage', async (req, res) => {
 
     const uploadedImage = req.files.image;
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const imagePath = path.join(permanentUploadsPath, uniqueSuffix + uploadedImage.name);
+    const imagePath = path.join(permanentUploadsPath, uniqueSuffix + uploadedImage.name);//////sever imagepath
     // Move the uploaded image to the permanent location
     uploadedImage.mv(imagePath, (err) => {
       if (err) {
@@ -54,6 +55,9 @@ app.post('/uploadimage', async (req, res) => {
       // Construct the URL of the uploaded image
       const imageUrl = `http://localhost:8000/uploads/${uniqueSuffix + uploadedImage.name}`;
 
+       // Remove the existing imagePath (if any)
+       user.imagePath = [];
+
       // Update the user's image path with the URL
       user.imagePath.unshift({
         url: imageUrl,
@@ -63,7 +67,7 @@ app.post('/uploadimage', async (req, res) => {
       user.save();
 
       console.log('Image uploaded successfully');
-      return res.status(200).json({ message: 'Image uploaded successfully', imagePath: imageUrl });
+      return res.status(200).json({ message: 'Image uploaded successfully', imageUrl });
     });
   } else {
     res.status(404).json({ message: "User not found" });
@@ -71,6 +75,50 @@ app.post('/uploadimage', async (req, res) => {
 });
 // Serve uploaded images
  app.use('/uploads', express.static(permanentUploadsPath));
+
+
+
+
+////////////deleting image
+
+
+//app.use(express.json());
+
+app.delete('/deleteimage', async (req, res) => {
+  const userId = req.body.userId;
+
+  try {
+    const user = await collection.findOne({ _id: userId });
+
+    if (user) {
+      if (user.imagePath && user.imagePath.length > 0) {
+        const imagePath = user.imagePath[0].url.replace('http://localhost:8000/uploads/', '');
+        const filePath = path.join(permanentUploadsPath, imagePath);
+    ////deleting from server
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting the file:', err);
+            return res.status(500).json({ error: 'Error deleting the file', details: err.message });
+          }
+
+          // Remove the image path from the user's record
+          user.imagePath = [];
+          user.save();
+
+          console.log('Profile picture deleted successfully');
+          return res.status(200).json({ message: 'Profile picture deleted successfully' });
+        });
+      } else {
+        res.status(400).json({ message: "No profile picture found" });
+      }
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error('Error deleting profile picture:', error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 // ////logout
 app.post("/logout", async (req, res) => {
