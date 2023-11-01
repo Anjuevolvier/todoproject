@@ -49,6 +49,17 @@ const newSchema=new mongoose.Schema({
               }
         }
     ],
+    imagePath:
+    [ {
+        url: {
+          type: String,
+         required: true,
+        },
+        description: {
+          type: String,
+        },
+      }
+    ]
 
 
 })

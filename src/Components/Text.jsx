@@ -25,6 +25,7 @@ export const Text = () => {
                             
                             }}>
                     <img src='/logo.png'
+                            alt='logo'
                         style={{
                             width:'50px',
                             height: '50px',

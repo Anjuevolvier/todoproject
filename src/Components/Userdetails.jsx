@@ -10,7 +10,8 @@ import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import Signupform from '../Components/Signupform';
-//import axios from 'axios';
+import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
+import axios from 'axios';
 
 
 
@@ -20,6 +21,11 @@ import Signupform from '../Components/Signupform';
 function Userdetails({ user,authToken,setAuthToken, }) {
 
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(undefined);
+  const [imagePath, setImagePath] = useState(null);
+  
+  
+
   const handleEditClick = () => {
 
     setIsEditing(true);
@@ -28,16 +34,15 @@ function Userdetails({ user,authToken,setAuthToken, }) {
   const handleClose = () => {
     setIsEditing(false);
   };
-
-
-
+  // const handleAvatarChange = (event) => {
+  //   const file = event.target.files[0];
+  //   setSelectedAvatar(file); 
+  //   console.log('setSelectedAvatar:',setSelectedAvatar);
+  // };
+  
   const history = useNavigate();
 
-  // const handleLogoutClick = () => {
-   
-  //   history('/');
-  // }
- 
+  ///////logout
   const handleLogoutClick = async () => {
     try {
      
@@ -67,7 +72,46 @@ function Userdetails({ user,authToken,setAuthToken, }) {
       console.error("Error during logout:", error);
     }
   };
-
+  ////image upload
+  
+  const handleAvatarChangeAndUpload = async (event) => {
+    console.log('hlo');
+    if (event.target.files && event.target.files.length > 0) {
+      console.log('inside');
+      const file = event.target.files[0];
+      setSelectedAvatar(file);
+  
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('userId', user._id); // Send the user ID as part of the form data
+  
+      try {
+        console.log('inside try');
+        const response = await axios.post("http://localhost:8000/uploadimage", formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${authToken}`,
+          },
+        });
+  
+        if (response.status === 200) {
+          setImagePath(response.data.imagePath);
+          console.log(response.data.imagePath)
+          console.log('Image uploaded successfully');
+        } else {
+          // Handle errors
+          console.error('Image upload failed on the server');
+        }
+      } catch (error) {
+        console.error('Error during image upload:', error);
+      }
+    } else {
+      console.log('No file selected');
+    }
+  };
+  
+  console.log(user);
+  console.log('imagepath',user.imagePath);
   return (
     <Box
 
@@ -84,9 +128,75 @@ function Userdetails({ user,authToken,setAuthToken, }) {
         padding:{xs:'10px',sm:'20px',md:'20px',lg:'20px',xl:'20px'}
       }}>
       <Box display={'flex'} flexDirection ={{xs:'column',sm:'row',md:'row',lg:'row',xl:'row'}} gap={'20px'}   >
-        <Box>
-          <Avatar sx={{ width: '150px', height: '150px', fontSize: '50px' }}>{user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}</Avatar>
+       
+      <Box>
+         
+     
+          {/* {selectedAvatar ? (
+            // Display the selected avatar
+           <Avatar src={URL.createObjectURL(selectedAvatar)} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
+           
+           ) : (
+            // Display the user's avatar
+            <Avatar sx={{ width: '150px', height: '150px', fontSize: '50px' }}>
+              {user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}
+            </Avatar>
+          )} */}
+            {user.imagePath && user.imagePath.length > 0 ? (
+              
+  // Display the uploaded avatar
+  // <Avatar src={user.imagePath[0].url} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
+  <Avatar src={`${user.imagePath[0].url}?${new Date().getTime()}`} sx={{ width: '150px', height: '150px', fontSize: '50px' }} />
+
+  
+
+) : (
+  // Display the user's avatar
+  <Avatar sx={{ width: '150px', height: '150px', fontSize: '50px' }}>
+    {user.firstname.charAt(0).toUpperCase() + user.lastname.charAt(0).toUpperCase()}
+  </Avatar> )}
+        
+
+          <input
+            type="file"
+            accept="image/*"
+            //onChange={handleAvatarChange}
+            onChange={handleAvatarChangeAndUpload}
+            style={{ display: 'none' }} // Hide the input
+            id="avatar-upload-input"
+           
+          />
+          <label htmlFor="avatar-upload-input" sx={{ cursor: 'pointer' }}>
+            <div
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '30px',
+                height: '30px',
+                backgroundColor: '#0E9B9',
+                borderRadius: '50%',
+                // position: 'absolute',
+                // bottom: '5px',
+                // right: '5px',
+                cursor: 'pointer',
+              }}
+            >
+              <span  
+                sx={{
+                  color: 'white',
+                  fontSize: '20px',
+                  fontWeight: 'bold',
+                  
+                }}
+                
+              >
+                 <AddAPhotoIcon  />
+              </span>
+            </div>
+          </label>
         </Box>
+
         <Box>
           <Typography
             sx={{

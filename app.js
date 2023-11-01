@@ -11,6 +11,14 @@ app.use(cors())
 const crypto = require('crypto');
 //const tokenExpiration = 3600; // 1 hour (in seconds)
 const bcrypt = require("bcrypt");
+const fileUpload = require('express-fileupload');
+const path = require('path');
+//const fs = require('fs');
+app.use(fileUpload()); // Enable file uploads
+
+
+
+
 
 
 
@@ -19,9 +27,52 @@ const bcrypt = require("bcrypt");
 app.get("/",cors(),(req,res)=>{
 
 })
+//image upload
+const permanentUploadsPath = path.join(__dirname, 'uploads');
 
+app.post('/uploadimage', async (req, res) => {
+  console.log('server');
+  const { userId } = req.body;
+  const user = await collection.findOne({ _id: userId });
+  if (user) {
+    console.log('insideuser');
 
-////logout
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const uploadedImage = req.files.image;
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const imagePath = path.join(permanentUploadsPath, uniqueSuffix + uploadedImage.name);
+    // Move the uploaded image to the permanent location
+    uploadedImage.mv(imagePath, (err) => {
+      if (err) {
+        console.error('Error while saving the file:', err);
+        return res.status(500).json({ error: 'Error while saving the file', details: err.message });
+      }
+
+      // Construct the URL of the uploaded image
+      const imageUrl = `http://localhost:8000/uploads/${uniqueSuffix + uploadedImage.name}`;
+
+      // Update the user's image path with the URL
+      user.imagePath.unshift({
+        url: imageUrl,
+      });
+
+      // Save the user with the updated image path
+      user.save();
+
+      console.log('Image uploaded successfully');
+      return res.status(200).json({ message: 'Image uploaded successfully', imagePath: imageUrl });
+    });
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
+});
+// Serve uploaded images
+ app.use('/uploads', express.static(permanentUploadsPath));
+
+// ////logout
 app.post("/logout", async (req, res) => {
   const { userId } = req.body;
 
@@ -29,9 +80,7 @@ app.post("/logout", async (req, res) => {
     const user = await collection.findOne({ _id: userId });
 
     if (user) {
-      // Remove the authentication string and expiration date from the user's record
-      // user.authToken = null;
-      // user.authTokenExpiration = null;
+     
       user.tokens = [];
       await user.save();
      //localStorage.removeItem('authToken');
