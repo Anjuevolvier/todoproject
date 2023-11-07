@@ -19,7 +19,7 @@ const newSchema=new mongoose.Schema({
         required:true,
         minlength:8,
     },
-  
+   
     firstname:{
         type:String,
         required:true
@@ -66,4 +66,44 @@ const newSchema=new mongoose.Schema({
 
 const collection = mongoose.model("collection",newSchema)
 
-module.exports=collection
+
+
+// // ///////////////////////////post
+
+const postSchema = new mongoose.Schema({
+  username:{
+    type:String,
+    required:true
+},
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    // ref: 'collection', // Reference to the user who created the post
+    required: true,
+  },
+  caption: {
+    type: String,
+    required: true,
+  },
+  images: [
+    {
+      url: {
+        type: String,
+        required: true,
+      },
+      description: {
+        type: String,
+      },
+    },
+  ],
+  content: {
+    type: String,
+    required: true,
+  }
+});
+
+ const post = mongoose.model("post", postSchema);
+
+ module.exports.collection = collection;
+ module.exports.post = post;
+
+

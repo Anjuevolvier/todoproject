@@ -2,7 +2,7 @@
 const express = require("express")
 // const mongoose = require("mongoose")
 // const router = express.Router();
-const collection = require("./mongo")
+const mongo = require("./mongo")
 const cors = require("cors")
 const app = express()
 app.use(express.json())
@@ -14,145 +14,18 @@ const bcrypt = require("bcrypt");
 const fileUpload = require('express-fileupload');
 const path = require('path');
 const fs = require('fs');
+//const router = express.Router();
 app.use(fileUpload()); // Enable file uploads
-
-
-
-
-
-
-
-
-  
-
 app.get("/",cors(),(req,res)=>{
 
 })
-//image upload
-const permanentUploadsPath = path.join(__dirname, 'uploads');
-
-app.post('/uploadimage', async (req, res) => {
-  console.log('server');
-  const { userId } = req.body;
-  const user = await collection.findOne({ _id: userId });
-  if (user) {
-    console.log('insideuser');
-
-    if (!req.files || !req.files.image) {
-      return res.status(400).json({ error: 'No file uploaded' });
-    }
-
-    const uploadedImage = req.files.image;
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    const imagePath = path.join(permanentUploadsPath, uniqueSuffix + uploadedImage.name);//////sever imagepath
-    // Move the uploaded image to the permanent location
-    uploadedImage.mv(imagePath, (err) => {
-      if (err) {
-        console.error('Error while saving the file:', err);
-        return res.status(500).json({ error: 'Error while saving the file', details: err.message });
-      }
-
-      // Construct the URL of the uploaded image
-      const imageUrl = `http://localhost:8000/uploads/${uniqueSuffix + uploadedImage.name}`;
-
-       // Remove the existing imagePath (if any)
-       user.imagePath = [];
-
-      // Update the user's image path with the URL
-      user.imagePath.unshift({
-        url: imageUrl,
-      });
-
-      // Save the user with the updated image path
-      user.save();
-
-      console.log('Image uploaded successfully');
-      return res.status(200).json({ message: 'Image uploaded successfully', imageUrl });
-    });
-  } else {
-    res.status(404).json({ message: "User not found" });
-  }
-});
-// Serve uploaded images
- app.use('/uploads', express.static(permanentUploadsPath));
-
-
-
-
-////////////deleting image
-
-
-//app.use(express.json());
-
-app.delete('/deleteimage', async (req, res) => {
-  const userId = req.body.userId;
-
-  try {
-    const user = await collection.findOne({ _id: userId });
-
-    if (user) {
-      if (user.imagePath && user.imagePath.length > 0) {
-        const imagePath = user.imagePath[0].url.replace('http://localhost:8000/uploads/', '');
-        const filePath = path.join(permanentUploadsPath, imagePath);
-    ////deleting from server
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.error('Error deleting the file:', err);
-            return res.status(500).json({ error: 'Error deleting the file', details: err.message });
-          }
-
-          // Remove the image path from the user's record
-          user.imagePath = [];
-          user.save();
-
-          console.log('Profile picture deleted successfully');
-          return res.status(200).json({ message: 'Profile picture deleted successfully' });
-        });
-      } else {
-        res.status(400).json({ message: "No profile picture found" });
-      }
-    } else {
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (error) {
-    console.error('Error deleting profile picture:', error);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-// ////logout
-app.post("/logout", async (req, res) => {
-  const { userId } = req.body;
-
-  try {
-    const user = await collection.findOne({ _id: userId });
-
-    if (user) {
-     
-      user.tokens = [];
-      await user.save();
-     //localStorage.removeItem('authToken');
-
-      res.json({ message: "User logged out successfully" });
-    } else {
-      res.status(404).json({ message: "User not found" });
-    }
-  } catch (e) {
-    console.error("Error during logout:", e);
-    res.status(500).json({ message: "Logout failed" });
-  }
-});
-
-
-
-
 //////login
 
 app.post("/", async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await collection.findOne({ email: email });
+    const user = await mongo.collection.findOne({ email: email });
 
 
     if (user) {
@@ -207,11 +80,12 @@ app.post("/", async (req, res) => {
   }
 
 });
+//////signup
 
 app.post("/signup", async (req, res) => {
   const { email, password, firstname, lastname, gender, phone } = req.body;
   try {
-    const check = await collection.findOne({ email: email });
+    const check = await mongo.collection.findOne({ email: email });
 
     if (check) {
       console.log("User already exists");
@@ -221,7 +95,7 @@ app.post("/signup", async (req, res) => {
 
       // console.log("User registered:");
       // res.json( "not exist");
-      // await collection.insertMany([data]);
+      // await mongo.collection.insertMany([data]);
       // Hash the password before saving it
       bcrypt.hash(password, 10, async (err, hashedPassword) => {
         if (err) {
@@ -236,10 +110,12 @@ app.post("/signup", async (req, res) => {
             gender: gender,
             phone: phone
           };
+         ;
+
 
           console.log("User registered:");
           res.json("not exist");
-          await collection.insertMany([data]);
+          await mongo.collection.insertMany([data]);
         }
       });
     }
@@ -255,10 +131,12 @@ app.post("/signup", async (req, res) => {
 app.get("/user/:id", async (req, res) => {
 
     const userId = req.params.id;
+    const authToken = req.headers.authorization;
+    console.log('authtoken',authToken);
 try {
 
-      // Use the userId to find the user in the MongoDB collection
-   const user = await collection.findOne({ _id: userId });
+      // Use the userId to find the user in the MongoDB mongo.collection
+   const user = await mongo.collection.findOne({ _id: userId })
 if (user) {
 
         // Send the user details as JSON response
@@ -286,7 +164,7 @@ app.put("/user/:id", async (req, res) => {
 try {
 
       // Use MongoDB update methods (e.g., findOneAndUpdate) to update the user
-      const updatedUserData = await collection.findOneAndUpdate(
+      const updatedUserData = await mongo.collection.findOneAndUpdate(
 
         { _id: userId },
 
@@ -318,6 +196,202 @@ try {
     }
 
   });
+  // ////logout
+app.post("/logout", async (req, res) => {
+  const { userId } = req.body;
+
+  try {
+    const user = await mongo.collection.findOne({ _id: userId });
+
+    if (user) {
+     
+      user.tokens = [];
+      await user.save();
+     //localStorage.removeItem('authToken');
+
+      res.json({ message: "User logged out successfully" });
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error("Error during logout:", e);
+    res.status(500).json({ message: "Logout failed" });
+  }
+});
+  //image upload
+const permanentUploadsPath = path.join(__dirname, 'uploads');
+
+app.post('/uploadimage', async (req, res) => {
+  console.log('server');
+  const { userId } = req.body;
+  const user = await mongo.collection.findOne({ _id: userId });
+  if (user) {
+    console.log('insideuser');
+
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const uploadedImage = req.files.image;
+    //console.log('uploadedImage',uploadedImage);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const imagePath = path.join(permanentUploadsPath, uniqueSuffix + uploadedImage.name);//////sever imagepath
+    // Move the uploaded image to the permanent location
+    uploadedImage.mv(imagePath, (err) => {
+      if (err) {
+        console.error('Error while saving the file:', err);
+        return res.status(500).json({ error: 'Error while saving the file', details: err.message });
+      }
+
+      // Construct the URL of the uploaded image
+      const imageUrl = `http://localhost:8000/uploads/${uniqueSuffix + uploadedImage.name}`;
+
+       // Remove the existing imagePath (if any)
+       user.imagePath = [];
+
+      // Update the user's image path with the URL
+      user.imagePath.unshift({
+        url: imageUrl,
+      });
+
+      // Save the user with the updated image path
+      user.save();
+
+      console.log('Image uploaded successfully');
+      return res.status(200).json({ message: 'Image uploaded successfully', imageUrl });
+    });
+  } else {
+    res.status(404).json({ message: "User not found" });
+  }
+});
+// Serve uploaded images
+ app.use('/uploads', express.static(permanentUploadsPath));
+
+
+
+
+////////////deleting image
+
+app.delete('/deleteimage', async (req, res) => {
+  const userId = req.body.userId;
+
+  try {
+    const user = await mongo.collection.findOne({ _id: userId });
+
+    if (user) {
+      if (user.imagePath && user.imagePath.length > 0) {
+        const imagePath = user.imagePath[0].url.replace('http://localhost:8000/uploads/', '');
+        const filePath = path.join(permanentUploadsPath, imagePath);
+    ////deleting from server
+        fs.unlink(filePath, (err) => {
+          if (err) {
+            console.error('Error deleting the file:', err);
+            return res.status(500).json({ error: 'Error deleting the file', details: err.message });
+          }
+
+          // Remove the image path from the user's record
+          user.imagePath = [];
+          user.save();
+
+          console.log('Profile picture deleted successfully');
+          return res.status(200).json({ message: 'Profile picture deleted successfully' });
+        });
+      } else {
+        res.status(400).json({ message: "No profile picture found" });
+      }
+    } else {
+      res.status(404).json({ message: "User not found" });
+    }
+  } catch (error) {
+    console.error('Error deleting profile picture:', error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+  ///////////posts
+
+
+//Handle the image and content upload
+
+// Define a route for creating a new post
+app.post('/posts', async (req, res) => {
+  console.log('inside post server');
+  const { userId, caption } = req.body;
+  const user = await mongo.collection.findOne({ _id: userId });
+
+  if (user) {
+    console.log('inside user');
+    if (!caption || !req.files || !req.files.image) {
+      console.log('help');
+      return res.status(400).json({ message: 'Both content and image are required' });
+      
+    }
+   
+    const uploadedImage = req.files.image;
+    console.log('uploadimage:',uploadedImage);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const imagePath = path.join(__dirname, 'uploads', uniqueSuffix + uploadedImage.name);
+    console.log('imagepath');
+
+    // Move the uploaded image to the permanent location
+    uploadedImage.mv(imagePath, (err) => {
+      if (err) {
+        console.error('Error while saving the file:', err);
+        return res.status(500).json({ error: 'Error while saving the file', details: err.message });
+      }
+
+      // Construct the URL of the uploaded image
+      const imageUrl = `http://localhost:8000/uploads/${uniqueSuffix + uploadedImage.name}`;
+
+      // Remove the existing imagePath (if any)
+      user.imagePath = [];
+
+      // Create a new post and save it to MongoDB
+      const newPost = new mongo.post({
+        username:user.firstname,
+        user: userId,
+        //content,
+        caption,
+        images: [
+          {
+            url: imageUrl,
+            description: 'Description for the uploaded image',
+          },
+        ],
+        // Add other post properties as needed
+      });
+      newPost.save()
+  .then((savedPost) => {
+    console.log('success');
+    res.status(200).json({ message: 'New post created successfully', savedPost: savedPost });
+  })
+  .catch((err) => {
+    console.error('Error creating a new post:', err);
+    res.status(500).json({ message: 'Error creating a new post' });
+  });
+    });
+  } else {
+    res.status(404).json({ message: 'User not found' });
+  }
+});
+
+//Serve uploaded images
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
+// Fetch all posts
+app.get('/fetchposts/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  try {
+    const posts = await mongo.post.find({ user: userId });
+  if(posts){
+    res.status(200).json({ posts });
+}
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    res.status(500).json({ message: 'Error fetching posts' });
+  }
+});
+
 app.listen(8000,()=>{
     console.log("port connected");
 })

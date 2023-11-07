@@ -29,10 +29,10 @@ function Userdetails({ user, authToken, setAuthToken, }) {
 
   useEffect(() => {
     let imageUrl = imagePath ? imagePath : (user.imagePath && user.imagePath[0] && user.imagePath[0].url) || '';
+  //let imageUrl = user.imagePath && user.imagePath.length > 0 ? user.imagePath[0].url : imagePath;
+
     setImageUrl(imageUrl);
   }, [imagePath, user.imagePath]);
-
-
 
 
   const handleEditClick = () => {
@@ -115,8 +115,9 @@ function Userdetails({ user, authToken, setAuthToken, }) {
     }
   };
   
-  
+  /////delete picture
   const handleDeleteProfilePicture = async () => {
+    alert('Do you really want to delete the profile picture ?');
     try {
       const response = await axios.delete('http://localhost:8000/deleteimage', {
         headers: {

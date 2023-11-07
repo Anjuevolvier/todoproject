@@ -3,6 +3,7 @@ import React from 'react'
 import Home from "./Pages/Home"
 import Login from "./Pages/Login"
 import Signup from "./Pages/Signup"
+import Feed from "./Pages/Feed"
 import Privateroute from './Components/Privateroute'
 import PublicRoute from './Components/PublicRoute'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
@@ -26,7 +27,13 @@ function App() {
           /> 
         <Route
             path="/"
+            element={<Privateroute element={<Feed />}  />}
+
+          />
+          <Route
+            path="/home"
             element={<Privateroute element={<Home />}  />}
+            
           />
            </Routes>
       </Router>

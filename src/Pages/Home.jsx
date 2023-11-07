@@ -34,6 +34,7 @@ const Home = () => {
 
 
     if (userId && authToken) {
+      console.log('inside home client')
       axios
         .get(`http://localhost:8000/user/${userId}`, {
           headers: {
