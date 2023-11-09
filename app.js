@@ -131,8 +131,8 @@ app.post("/signup", async (req, res) => {
 app.get("/user/:id", async (req, res) => {
 
     const userId = req.params.id;
-    const authToken = req.headers.authorization;
-    console.log('authtoken',authToken);
+    //const authToken = req.headers.authorization;
+    //console.log('authtoken',authToken);
 try {
 
       // Use the userId to find the user in the MongoDB mongo.collection
@@ -309,28 +309,42 @@ app.delete('/deleteimage', async (req, res) => {
 });
   ///////////posts
 
-
-//Handle the image and content upload
-
 // Define a route for creating a new post
 app.post('/posts', async (req, res) => {
-  console.log('inside post server');
-  const { userId, caption } = req.body;
+  // console.log('inside post server');
+  const { userId, text } = req.body;
   const user = await mongo.collection.findOne({ _id: userId });
 
   if (user) {
-    console.log('inside user');
-    if (!caption || !req.files || !req.files.image) {
-      console.log('help');
-      return res.status(400).json({ message: 'Both content and image are required' });
+    // console.log('inside user');
+    if (!req.files || !req.files.image) {
+      const newPost = new mongo.post({
+        username: user.firstname,
+        user: userId,
+        text:text,
+        images: [], // Empty array for images since there is no image
+      });
+      //console.log('Text:',newPost);
+      // console.log('help');
+      // return res.status(400).json({ message: 'Both content and image are required' });
+
+      newPost.save()
+        .then((savedPost) => {
+          res.status(200).json({ message: 'New post created successfully', savedPost: savedPost });
+        })
+        .catch((err) => {
+          console.error('Error creating a new post:', err);
+          res.status(500).json({ message: 'Error creating a new post' });
+        });
       
     }
+    else{
    
     const uploadedImage = req.files.image;
     console.log('uploadimage:',uploadedImage);
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const imagePath = path.join(__dirname, 'uploads', uniqueSuffix + uploadedImage.name);
-    console.log('imagepath');
+    //console.log('imagepath');
 
     // Move the uploaded image to the permanent location
     uploadedImage.mv(imagePath, (err) => {
@@ -349,15 +363,13 @@ app.post('/posts', async (req, res) => {
       const newPost = new mongo.post({
         username:user.firstname,
         user: userId,
-        //content,
-        caption,
+        text:text,
         images: [
           {
             url: imageUrl,
             description: 'Description for the uploaded image',
           },
         ],
-        // Add other post properties as needed
       });
       newPost.save()
   .then((savedPost) => {
@@ -369,26 +381,107 @@ app.post('/posts', async (req, res) => {
     res.status(500).json({ message: 'Error creating a new post' });
   });
     });
+  }
   } else {
     res.status(404).json({ message: 'User not found' });
   }
 });
 
-//Serve uploaded images
+  //Serve uploaded images
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
-// Fetch all posts
+///////////fetch post of user and users friend post
 app.get('/fetchposts/:userId', async (req, res) => {
   const userId = req.params.userId;
+
   try {
-    const posts = await mongo.post.find({ user: userId });
-  if(posts){
-    res.status(200).json({ posts });
-}
+    // Find the logged-in user
+    const user = await mongo.collection.findOne({ _id: userId });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find posts for the logged-in user
+    const userPosts = await mongo.post.find({ user: userId });
+
+    // Find posts for users in the user's followlist
+    const followedPosts = await mongo.post.find({ user: { $in: user.followlist } });
+
+    // Combine and sort the posts by timestamp (you may need to adjust the schema for timestamps)
+    const allPosts = [...userPosts, ...followedPosts].sort((a, b) => b.timestamp - a.timestamp);
+
+    res.status(200).json({ posts: allPosts });
   } catch (error) {
-    console.error('Error fetching posts:', error);
-    res.status(500).json({ message: 'Error fetching posts' });
+    console.error('Error fetching posts for the feed:', error);
+    res.status(500).json({ message: 'Error fetching posts for the feed' });
+  }
+});
+
+
+////////////////// user search
+
+app.get('/users/search', async (req, res) => {
+  const query = req.query.query;
+  console.log('inside search server')
+  if (!query) {
+    return res.status(400).json({ error: 'Search query is required' });
+    //console.log('help');
+  }
+
+  try {
+    
+     const searchResults = await mongo.collection.find({
+      $or:
+       [
+        { firstname: { $regex: new RegExp(query, 'i') } },
+        { lastname: { $regex: new RegExp(query, 'i') } },
+      ],
+      
+       
+    });
+    
+    console.log('searchResults',searchResults);
+    res.json({ users: searchResults });
+  } catch (error) {
+    console.error('Error fetching users from the database:', error);
+    res.status(500).json({ message: 'Error fetching users' });
+  }
+});
+
+//////////// to follow user
+
+app.post('/users/follow/:userId/:otherUserId', async (req, res) => {
+  const userId = req.params.userId; // The ID of the user who wants to follow
+  const otherUserId = req.params.otherUserId; // The ID of the user to be followed
+
+  try {
+    // Find the user who wants to follow
+    const user = await mongo.collection.findOne({ _id: userId });
+
+    // Find the user to be followed
+    const otherUser = await mongo.collection.findOne({ _id: otherUserId });
+
+    if (!user || !otherUser) {
+      return res.status(404).json({ message: 'User(s) not found' });
+    }
+
+    // Check if the user is already following the other user
+    const isFollowing = user.followlist.includes(otherUserId);
+
+    if (isFollowing) {
+      return res.status(400).json({ message: 'User is already following the other user' });
+    }
+
+    // Add the other user's ID to the user's followlist
+    user.followlist.push(otherUserId);
+    await user.save();
+
+    res.status(200).json({ message: 'User is now following the other user' });
+  } catch (error) {
+    console.error('Error following user:', error);
+    res.status(500).json({ message: 'Error following user' });
   }
 });
 
