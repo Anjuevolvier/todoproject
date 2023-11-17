@@ -83,7 +83,7 @@ const postSchema = new mongoose.Schema({
 },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    // ref: 'collection', // Reference to the user who created the post
+     ref: 'collection', // Reference to the user who created the post
     required: true,
   },
   text: {
@@ -101,6 +101,14 @@ const postSchema = new mongoose.Schema({
       },
     },
   ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+  createdMonth: {
+    type: String,
+    default: new Date().toLocaleString('default', { month: 'long' }),
+  },
 });
 
  const post = mongoose.model("post", postSchema);

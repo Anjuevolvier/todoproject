@@ -330,7 +330,7 @@ app.post('/posts', async (req, res) => {
 
       newPost.save()
         .then((savedPost) => {
-          res.status(200).json({ message: 'New post created successfully', savedPost: savedPost });
+          res.status(200).json({ message: 'New post created successfully', savedPost: savedPost,user:user });
         })
         .catch((err) => {
           console.error('Error creating a new post:', err);
@@ -374,7 +374,7 @@ app.post('/posts', async (req, res) => {
       newPost.save()
   .then((savedPost) => {
     console.log('success');
-    res.status(200).json({ message: 'New post created successfully', savedPost: savedPost });
+    res.status(200).json({ message: 'New post created successfully', savedPost: savedPost,user:user });
   })
   .catch((err) => {
     console.error('Error creating a new post:', err);
@@ -404,22 +404,20 @@ app.get('/fetchposts/:userId', async (req, res) => {
     }
 
     // Find posts for the logged-in user
-    const userPosts = await mongo.post.find({ user: userId });
+    const userPosts = await mongo.post.find({ user: userId }).populate('user');
 
     // Find posts for users in the user's followlist
-    const followedPosts = await mongo.post.find({ user: { $in: user.followlist } });
+    const followedPosts = await mongo.post.find({ user: { $in: user.followlist } }).populate('user');
 
     // Combine and sort the posts by timestamp (you may need to adjust the schema for timestamps)
     const allPosts = [...userPosts, ...followedPosts].sort((a, b) => b.timestamp - a.timestamp);
 
-    res.status(200).json({ posts: allPosts });
+    res.status(200).json({posts: allPosts,user:user});
   } catch (error) {
     console.error('Error fetching posts for the feed:', error);
     res.status(500).json({ message: 'Error fetching posts for the feed' });
   }
 });
-
-
 ////////////////// user search
 
 app.get('/users/search', async (req, res) => {
@@ -435,12 +433,13 @@ app.get('/users/search', async (req, res) => {
      const searchResults = await mongo.collection.find({
       $or:
        [
-        { firstname: { $regex: new RegExp(query, 'i') } },
+        { firstname: { $regex: new RegExp(query, 'i') } },////i match case sensitive
         { lastname: { $regex: new RegExp(query, 'i') } },
-      ],
-      
-       
+        // { $and: [{ firstname: { $regex: new RegExp(query, 'i') } },{ lastname: { $regex: new RegExp(query, 'i') } }] },
+      ],  
+     
     });
+    
     
     console.log('searchResults',searchResults);
     res.json({ users: searchResults });
@@ -473,15 +472,29 @@ app.post('/users/follow/:userId/:otherUserId', async (req, res) => {
     if (isFollowing) {
       return res.status(400).json({ message: 'User is already following the other user' });
     }
-
-    // Add the other user's ID to the user's followlist
     user.followlist.push(otherUserId);
-    await user.save();
+   await user.save();
 
     res.status(200).json({ message: 'User is now following the other user' });
   } catch (error) {
     console.error('Error following user:', error);
     res.status(500).json({ message: 'Error following user' });
+  }
+});
+
+//////////////////to avoid add friend again
+app.get('/users/following/:userId', async (req, res) => {
+  const userId = req.params.userId;
+
+  try {
+    // Assuming you have a MongoDB collection called "users" with a "followlist" field
+    const user = await mongo.collection.findOne({ _id: userId });
+    const followingUsers = user.followlist || [];
+
+    res.status(200).json({ following: followingUsers });
+  } catch (error) {
+    console.error('Error fetching following users:', error);
+    res.status(500).json({ error: 'Error fetching following users' });
   }
 });
 

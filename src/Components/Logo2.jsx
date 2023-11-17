@@ -15,10 +15,11 @@ const Logo2 = () =>
         width:'100%',
         height:'auto',
         textAlign:'center',
-        marginLeft:{xs:'120px',sm:'0px',md:'0px',lg:'0px'},
+        marginLeft:{xs:'60px',sm:'0px',md:'0px',lg:'0px'},
          
  }}>
         <img src='/Group 68.png' 
+        alt='img'
             style={{
                 
                 // maxWidth:{xs:'200px',sm:'200px',lg:'400.508px'},
